@@ -6,11 +6,14 @@ import nltk
 from nltk import sent_tokenize,word_tokenize
 import string
 import pygame
-
+import test
+from numpy.core.multiarray import inner
+from audioop import reverse
 pygame.init()
 #to take the input from the command line
 search_item = sys.argv[1]
 print(search_item)
+
 
 summaryWiki = wikipedia.summary("Wikipedia")
 
@@ -23,11 +26,33 @@ for item in results:
 text_list = []
 for item in result_dict.values():
     text_list.append(word_tokenize(item))
-        
+
 taggedList = []    
 for item in text_list:
     taggedList.append(nltk.pos_tag(item))
-    
+
+pos_word_dict = {}
+for item in taggedList:
+    for innerItem in item:
+        if innerItem[1] in pos_word_dict:
+            pos_word_dict[innerItem[1]].append(innerItem[0].lower())
+        else:
+            pos_word_dict[innerItem[1]] = [innerItem[0].lower()]
+
+for item in pos_word_dict.keys():
+    word_freq = {}
+    for listItem in pos_word_dict[item]:
+        if listItem in word_freq:
+            word_freq[listItem] += 1
+        else:
+            word_freq[listItem] = 1
+    pos_word_dict[item] = word_freq
+
+for item in pos_word_dict.keys():
+    pos_word_dict[item] = sorted(pos_word_dict[item].items(), key=operator.itemgetter(1), reverse = True)
+#sorted(freqDict.items(), key=operator.itemgetter(1), reverse = True)
+
+#print(pos_word_dict)
 adjList = []
 for listItem in taggedList:
     for innerListItem in listItem:
@@ -43,11 +68,15 @@ for item in adjList:
         
 sortedFreq = sorted(freqDict.items(), key=operator.itemgetter(1))
 
+if test.test(pos_word_dict):
+    print ("Yay, you passed this part of the test!")
+else:
+    print ("Oh noes! You didn't pass. Please try again")
+
 topAdjList = []
 for i in range(len(sortedFreq)-6,len(sortedFreq)):
     topAdjList.append(sortedFreq[i][0]) 
-    
-print(topAdjList)
+
 adj_List = topAdjList
 
 
